@@ -10,25 +10,31 @@ function Test-XMLFile {
 
     # Check the file exists
     if (!(Test-Path -Path $xmlFilePath)){
-        throw "$xmlFilePath is not valid. Please provide a valid path to the .xml file"
+        throw "$xmlFilePath does not exist. Please provide a valid path to the .xml file"
     }
-    #Write-Host $xmlFilePath
 
     # Check for Load or Parse errors when loading the XML file
     $xml = New-Object System.Xml.XmlDocument
     try {
         $xml.Load((Get-ChildItem -Path $xmlFilePath).FullName)
-        #return $true
+        return ($true).ToString()
     }
     catch [System.Xml.XmlException] {
         Write-Verbose "$xmlFilePath : $($_.toString())"
-        #return $false
+        return $_.toString()
     }
 }
 
-$pa = "C:\ProgramData\chocolatey"
-$exclude = @("*.arguments", "*.exe*", "*.txt", "*.dll", "*.cmd", "*.log", "*.msi*", "*.nupkg", "*.ps1", "*.chm", "*.hlm", "*.CNT", "*.SYS", "*.jpg", "*.HLP", "*.PSM1", "*.png")
+$ChocoInstallDir = "C:\ProgramData\chocolatey"
 
-Get-ChildItem -Recurse -Exclude $exclude -file -Path $pa | ForEach-Object {
-    Test-XMLFile $_.FullName -Verbose
+# XML file extensions that choco use
+$include = @("*.config", "*.files", "*.registry")
+
+# Get all files including hidden ones that match include list
+Get-ChildItem -Recurse -include $include -Path $ChocoInstallDir -Force -File | ForEach-Object {
+    #Test-XMLFile $_.FullName -Verbose
+    [PSCustomObject]@{
+        FullPath = $_.FullName
+        ValidXML = Test-XMLFile $_.FullName
+    }
 }
