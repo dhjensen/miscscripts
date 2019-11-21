@@ -45,7 +45,7 @@ imap_host = 'imap.gmail.com'
 imap_user = username
 imap_pass = password
 
-# connect to host using SSL and login
+# Connect to host using SSL and login
 imap = IMAP4_SSL(imap_host, 993)
 imap.login(imap_user, imap_pass)
 imap.select(EMAIL_FOLDER)
@@ -71,24 +71,9 @@ for num in data[0].split():
         if part.get_content_type() == 'application/pdf':
             # Save PDF document to drive
             filename = Path(ONEDRIVE_FOLDER).joinpath(part.get_filename())
-            #filename =    
-            #fd = open(filename, "wb")
-            #print(fd)
             filename.write_bytes(part.get_payload(decode=True))
             
         # TO-DO: make sure PDF document have no password and store it in OneDrive
-
-    # print("Raw date:", msg['Date'] )
-
-    # print(msg)
-
-    # if msg['X-MS-Has-Attach'] == "yes":
-    #     print("Muuh:", msg['Content-Description'] )
-    #     print("Disposition", msg['Content-Disposition'])
-
-    #print('Message: {0}\n'.format(num))
-    #pprint.pprint(data[0][1])
-    #break
 
 imap.close()
 imap.logout()
