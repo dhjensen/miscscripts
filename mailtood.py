@@ -62,14 +62,10 @@ for num in data[0].split():
     #msg = email.message_from_string(data[0][1].decode('utf-8'))
     msg = message_from_bytes(data[0][1], policy=policy.default)
 
-    for part in msg.walk():
-        # multipart/* are just containers
-        if part.get_content_maintype() == 'multipart':
-            continue
-            
+    for part in msg.walk():           
         #  Do something if the part is an 'application/pdf'
         if part.get_content_type() == 'application/pdf':
-            # Save PDF document to drive
+            # Save PDF document to OneDrive
             filename = Path(ONEDRIVE_FOLDER).joinpath(part.get_filename())
             filename.write_bytes(part.get_payload(decode=True))
             
