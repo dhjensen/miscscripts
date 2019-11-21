@@ -1,26 +1,25 @@
 #!/usr/bin/env python3
 """ Retrieve mail attachment from mail and copy them to OneDrive
+    Remove password protection on PDF documents.
 
 Usage: 
-    
 
 Example: 
 """
 
-import imaplib
 import sys
 import getopt
+from imaplib import IMAP4_SSL
+from pathlib import Path
 from email.message import EmailMessage
 from email import message_from_bytes
 from email import policy
 
-# Use 'INBOX' to read inbox.  Note that whatever folder is specified, 
-# after successfully running this script all emails in that folder 
-# will be marked as read.
 EMAIL_FOLDER = "Job/Salary"
-username = ''
-password = ''
-helpmsg = 'test.py -u username -p password'
+ONEDRIVE_FOLDER = "C:\\\\Users\\dhjensen\\OneDrive\\salarytest"
+# username = ''
+# password = ''
+helpmsg = 'mailtool.py -u username -p password'
 
 def main(argv):
     global username, password
@@ -46,15 +45,13 @@ imap_host = 'imap.gmail.com'
 imap_user = username
 imap_pass = password
 
-# connect to host using SSL
-imap = imaplib.IMAP4_SSL(imap_host, 993)
-
-## login to server
+# connect to host using SSL and login
+imap = IMAP4_SSL(imap_host, 993)
 imap.login(imap_user, imap_pass)
-
 imap.select(EMAIL_FOLDER)
 
-rv, data = imap.search(None, 'ALL')
+rv, data = imap.search(None, 'ALL')    
+
 for num in data[0].split():
     rv, data = imap.fetch(num, '(RFC822)')
     
@@ -70,12 +67,15 @@ for num in data[0].split():
         if part.get_content_maintype() == 'multipart':
             continue
             
-
-        #  and "creation-date" in part
-        if part.is_attachment():
-            print(part.get_filename())
-            #print(part["date"])
-
+        #  Do something if the part is an 'application/pdf'
+        if part.get_content_type() == 'application/pdf':
+            # Save PDF document to drive
+            filename = Path(ONEDRIVE_FOLDER).joinpath(part.get_filename())
+            #filename =    
+            #fd = open(filename, "wb")
+            #print(fd)
+            filename.write_bytes(part.get_payload(decode=True))
+            
         # TO-DO: make sure PDF document have no password and store it in OneDrive
 
     # print("Raw date:", msg['Date'] )
@@ -88,7 +88,7 @@ for num in data[0].split():
 
     #print('Message: {0}\n'.format(num))
     #pprint.pprint(data[0][1])
-    break
+    #break
 
 imap.close()
 imap.logout()
