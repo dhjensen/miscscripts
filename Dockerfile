@@ -9,7 +9,7 @@ FROM python:3.7.4-alpine3.9
 #FROM continuumio/miniconda3
 
 LABEL Name=mailtood Version=0.0.1
-EXPOSE 3000
+#EXPOSE 3000
 
 ENV user="null" \
     password="null"
