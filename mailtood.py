@@ -9,6 +9,8 @@ Example:
 
 import sys
 import getopt
+import io
+from PyPDF2 import PdfFileReader, PdfFileWriter
 from imaplib import IMAP4_SSL
 from pathlib import Path
 from email.message import EmailMessage
@@ -17,26 +19,26 @@ from email import policy
 
 EMAIL_FOLDER = "Job/Salary"
 ONEDRIVE_FOLDER = "C:\\\\Users\\dhjensen\\OneDrive\\salarytest"
-# username = ''
-# password = ''
-helpmsg = 'mailtool.py -u username -p password'
+helpmsg = 'mailtool.py -u username -p password -c cprnumber'
 
 def main(argv):
-    global username, password
+    global username, password, cpr
 
     try:
-      opts, args = getopt.getopt(argv,"hu:p:",["username=","password="])
+        opts, args = getopt.getopt(argv,"hu:p:c",["username=","password=","cpr="])
     except getopt.GetoptError:
-      print(helpmsg)
-      sys.exit(2)
+        print(helpmsg)
+        sys.exit(2)
     for opt, arg in opts:
-      if opt == '-h':
-         print(helpmsg)
-         sys.exit()
-      elif opt in ("-u", "--username"):
-         username = arg
-      elif opt in ("-p", "--password"):
-         password = arg
+        if opt == '-h':
+            print(helpmsg)
+            sys.exit()
+        elif opt in ("-u", "--username"):
+            username = arg
+        elif opt in ("-p", "--password"):
+            password = arg
+        elif opt in ("-c", "--cpr"):
+            cpr = arg
 
 if __name__ == "__main__":
     main(sys.argv[1:])
@@ -45,7 +47,6 @@ imap_host = 'imap.gmail.com'
 imap_user = username
 imap_pass = password
 
-# Connect to host using SSL and login
 imap = IMAP4_SSL(imap_host, 993)
 imap.login(imap_user, imap_pass)
 imap.select(EMAIL_FOLDER)
@@ -59,17 +60,27 @@ for num in data[0].split():
         print("ERROR getting message", num)
         break
     
-    #msg = email.message_from_string(data[0][1].decode('utf-8'))
     msg = message_from_bytes(data[0][1], policy=policy.default)
 
     for part in msg.walk():           
         #  Do something if the part is an 'application/pdf'
         if part.get_content_type() == 'application/pdf':
-            # Save PDF document to OneDrive
-            filename = Path(ONEDRIVE_FOLDER).joinpath(part.get_filename())
-            filename.write_bytes(part.get_payload(decode=True))
-            
-        # TO-DO: make sure PDF document have no password and store it in OneDrive
 
+            # Todo: Fix file extension
+            filename = Path(ONEDRIVE_FOLDER).joinpath(part.get_filename())
+            
+            with io.BytesIO(part.get_payload(decode=True)) as open_pdf_file:
+                pdf = PdfFileReader(open_pdf_file)
+                if pdf.isEncrypted:
+                    #print(part.get_filename() + " is encrypted")
+                    pdf.decrypt(cpr)
+                    #print(part.get_filename() + " Decrypted")
+                print(filename.absolute)
+                outpdf = PdfFileWriter()
+                for p in range(pdf.numPages):
+                    outpdf.addPage(pdf.getPage(p))
+
+                outpdf.write(open(filename.resolve(), "wb"))
+                        
 imap.close()
 imap.logout()
