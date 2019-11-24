@@ -10,6 +10,7 @@ Example:
 import sys
 import getopt
 import io
+# TODO: Replace PyPDF2 with pikepdf 1.7.0
 from PyPDF2 import PdfFileReader, PdfFileWriter
 from imaplib import IMAP4_SSL
 from pathlib import Path
@@ -64,23 +65,24 @@ for num in data[0].split():
 
     for part in msg.walk():           
         #  Do something if the part is an 'application/pdf'
-        if part.get_content_type() == 'application/pdf':
 
-            # Todo: Fix file extension
-            filename = Path(ONEDRIVE_FOLDER).joinpath(part.get_filename())
-            
+        if part.get_content_type() == 'application/pdf' or part.get_content_type() == 'application/octet-stram':
+
+            AbsoluteFileName = Path(ONEDRIVE_FOLDER).joinpath(part.get_filename())         
+
+            if AbsoluteFileName.suffix != ".pdf":                
+                AbsoluteFileName = AbsoluteFileName.with_suffix('.pdf')
+                
             with io.BytesIO(part.get_payload(decode=True)) as open_pdf_file:
                 pdf = PdfFileReader(open_pdf_file)
                 if pdf.isEncrypted:
-                    #print(part.get_filename() + " is encrypted")
                     pdf.decrypt(cpr)
-                    #print(part.get_filename() + " Decrypted")
-                print(filename.absolute)
+                #print(AbsoluteFileName.absolute)
                 outpdf = PdfFileWriter()
                 for p in range(pdf.numPages):
                     outpdf.addPage(pdf.getPage(p))
 
-                outpdf.write(open(filename.resolve(), "wb"))
+                #outpdf.write(open(AbsoluteFileName.resolve(), "wb"))
                         
 imap.close()
 imap.logout()
