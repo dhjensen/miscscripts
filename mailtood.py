@@ -7,6 +7,8 @@ Usage:
 Example: 
 """
 
+# TODO: Use https://github.com/pdfminer/pdfminer.six to get month / year from salary documents for naming purposes
+
 import sys
 import getopt
 import io
@@ -21,6 +23,9 @@ from email import policy
 EMAIL_FOLDER = "Job/Salary"
 ONEDRIVE_FOLDER = "C:\\\\Users\\dhjensen\\OneDrive\\salarytest"
 helpmsg = 'mailtool.py -u username -p password -c cprnumber'
+username = ''
+password = ''
+cpr = ''
 
 def main(argv):
     global username, password, cpr
