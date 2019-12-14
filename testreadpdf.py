@@ -7,6 +7,8 @@ Usage:
 Example: 
 """
 
+# TODO: Try out this link https://stackoverflow.com/questions/58226546/python-data-extraction-from-an-encrypted-pdf
+
 # Have to comment out line 131-132 in pdfpage.py in pdfminer to extract text:
         # if check_extractable and not doc.is_extractable:
         #     raise PDFTextExtractionNotAllowed('Text extraction is not allowed: %r' % fp)
