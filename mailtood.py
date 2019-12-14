@@ -7,7 +7,9 @@ Usage:
 Example: 
 """
 
-# TODO: Use https://github.com/pdfminer/pdfminer.six to get month / year from salary documents for naming purposes
+# TODO: pdfminer: Use https://github.com/pdfminer/pdfminer.six to get month / year from salary documents for naming purposes
+# TODO: pdfminer: Create patch to allow pdfminer to read text from protected documents optionally
+# TODO: Decide pdf naming standard
 
 import sys
 import getopt
