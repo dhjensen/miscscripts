@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
-""" Retrieve mail attachment from mail and copy them to OneDrive
+""" Retrieve mail attachment from mail and copy them to OneDrive following the naming standard
     Remove password protection on PDF documents.
+    
+    PDF naming standard:
+    <YEAR>-<MONTH>-<NUMBER>.pdf
+    example: 2015-november-1.pdf
 
 Usage: 
 
@@ -9,7 +13,8 @@ Example:
 
 # TODO: pdfminer: Use https://github.com/pdfminer/pdfminer.six to get month / year from salary documents for naming purposes
 # TODO: pdfminer: Create patch to allow pdfminer to read text from protected documents optionally
-# TODO: Decide pdf naming standard
+
+
 
 import sys
 import getopt
