@@ -2,19 +2,28 @@
 
 Various scripts I find usefull
 
-## courserip/Get.ps1
+## File description
+
+### courserip/Get.ps1
 
 Script to rip course material  
 Only tested with <https://www.pluralsight.com/>
 
-## FindBadXMLChoco.ps1
+### FindBadXMLChoco.ps1
 
 Resursively find the bad XML files in a choco install dir
 
-## mailtool.py
+### mailtool.py
 
 Use <https://www.python.org/dev/peps/pep-0008/>
 
-## lastsickday.py
+### lastsickday.py
 
 Attempt at having "fun" while being sick.
+
+## Ideas
+
+A list of ideas:
+
+* IDEA: Convert app to wep application.
+** Host the web application as a docker container.
