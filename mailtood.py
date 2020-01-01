@@ -11,16 +11,13 @@ Usage:
 Example: 
 """
 
-# TODO: pdfminer: Use https://github.com/pdfminer/pdfminer.six to get month / year from salary documents for naming purposes
 # TODO: pdfminer: Create patch to allow pdfminer to read text from protected documents optionally
-
 
 
 import sys
 import getopt
-import io
-# TODO: Replace PyPDF2 with pikepdf 1.7.0
-from PyPDF2 import PdfFileReader, PdfFileWriter
+import base64
+from io import BytesIO
 from imaplib import IMAP4_SSL
 from pathlib import Path
 from email.message import EmailMessage
@@ -77,24 +74,31 @@ for num in data[0].split():
 
     for part in msg.walk():           
         #  Do something if the part is an 'application/pdf'
-
+        
         if part.get_content_type() == 'application/pdf' or part.get_content_type() == 'application/octet-stram':
 
             AbsoluteFileName = Path(ONEDRIVE_FOLDER).joinpath(part.get_filename())         
 
-            if AbsoluteFileName.suffix != ".pdf":                
+            if AbsoluteFileName.suffix != '.pdf':                
                 AbsoluteFileName = AbsoluteFileName.with_suffix('.pdf')
+            
+            # Write file to disk
+            
+            payload = part.get_payload()
+            #payload_bytes = str.encode(payload)
+            
+            # TODO: Before writing to disk make sure to strip the password from PDF doc
+            
+            with open(AbsoluteFileName.resolve(), 'wb') as f:
+                print('Writing: ' + AbsoluteFileName.__str__())
+                f.write(base64.b64decode(payload))
+                                        
+            #with BytesIO(part.get_payload(decode=True)) as open_pdf_file:
+                                    
+                #pdf = Pdf.open(filename_or_stream = BytesIO(part.get_payload(decode=True)), password = cpr)
+                #pdf.save(filename = open(AbsoluteFileName.resolve(), 'wb'))
                 
-            with io.BytesIO(part.get_payload(decode=True)) as open_pdf_file:
-                pdf = PdfFileReader(open_pdf_file)
-                if pdf.isEncrypted:
-                    pdf.decrypt(cpr)
-                #print(AbsoluteFileName.absolute)
-                outpdf = PdfFileWriter()
-                for p in range(pdf.numPages):
-                    outpdf.addPage(pdf.getPage(p))
-
-                #outpdf.write(open(AbsoluteFileName.resolve(), "wb"))
+                   
                         
 imap.close()
 imap.logout()
