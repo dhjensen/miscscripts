@@ -18,6 +18,8 @@ Example:
 # TODO: Test extracting dates for filenames from a broather list of PDF documents
 # Alternative description: pdfminer: Use https://github.com/pdfminer/pdfminer.six to get month / year from salary documents for naming purposes
 
+# TODO: Split create_file_name() into two functions
+
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.converter import TextConverter
 from pdfminer.layout import LAParams
@@ -25,11 +27,13 @@ from pdfminer.pdfpage import PDFPage
 from io import StringIO
 from dateparser import parse
 from datetime import datetime
+from pikepdf import Pdf
+import os
 
 """ Gets any text in a protected pdf document provided in path argument
 
 """
-def extract_protected_pdf_text(path):
+def extract_protected_pdf_text(path: str, password: str) -> str:
     
     output = StringIO()
 
@@ -43,7 +47,7 @@ def extract_protected_pdf_text(path):
 
     page_numbers = set()
     
-    for page in PDFPage.get_pages(pdf_infile, page_numbers, maxpages=0, caching=True, check_extractable=False):
+    for page in PDFPage.get_pages(pdf_infile, page_numbers, maxpages=0, password=password, caching=True, check_extractable=False):
         interpreter.process_page(page)
 
     text = output.getvalue()
@@ -57,26 +61,73 @@ def extract_protected_pdf_text(path):
 """
 def create_file_name(text: str) -> str:
     
-    pdf_text = text
-
     index_string = 'Udskrevet '
-    index_string_lenght = len(index_string)
-    temp_date_string = pdf_text[pdf_text.index(index_string)+index_string_lenght:-1]
-    date_string = temp_date_string[0:temp_date_string.index('\n')]
-
-    printed_date = parse(date_string)
-
-    # PDF naming standard:
-    # <YEAR>-<MONTH>-<NUMBER>.pdf
-    # example: 2015-november-1.pdf
-    file_name_string = '{0:%Y}-{0:%B}-{1}.pdf'.format(printed_date, 1)
     
+    if index_string in text:
+        pdf_text = text
+
+        index_string_lenght = len(index_string)
+        temp_date_string = pdf_text[pdf_text.index(index_string)+index_string_lenght:-1]
+        date_string = temp_date_string[0:temp_date_string.index('\n')]
+
+        printed_date = parse(date_string)
+
+        # PDF naming standard:
+        # <YEAR>-<MONTH>-<NUMBER>.pdf
+        # example: 2015-november-1.pdf
+        file_name_string = '{0:%Y}-{0:%B}-{1}.pdf'.format(printed_date, 1)
+    else:
+        file_name = text
+        printed_date = parse(file_name)
+        file_name_string = '{0:%Y}-{0:%B}-{1}.pdf'.format(printed_date, 1)
+        
     return file_name_string
 
+""" Removes encryption from PDF and safe it to disk
+
+"""
+def remove_password_and_save(input_path: str, output_path: str):
+    with Pdf.open(input_path) as pdf:
+        pdf.save(filename = output_path, encryption = None)
+        
+""" 
+
+"""
+def get_pdf_files_list(path: str):
+
+    files_return = []
+    for root, directories, files in os.walk(path):
+        for file in files:
+            if '.pdf' in file:
+                files_return.append(os.path.join(root, file))
+                
+    return files_return
+
 def main():
-    extracted_text = extract_protected_pdf_text(path = 'pdfin\\15935_22801.pdf')
-    file_name = create_file_name(text = extracted_text)
-    print(file_name)
+    source_path = 'C:\\Users\\dhjensen\\OneDrive\\salarytest'
+    
+    files = get_pdf_files_list(source_path)
+    
+    for file in files:
+        
+        if 'Daniel_Jensen' in file:
+            file_name = create_file_name(file)
+            output_file_name = 'pdfout\\' + file_name
+            print (output_file_name)
+        else:
+            print('Shouldnt see me: ' + file)
+        # elif 'DAJE' in file:
+        #     extracted_text = extract_protected_pdf_text(path=file, password=)
+        #     file_name = create_file_name(text = extracted_text)
+        #     output_file_name = 'pdfout\\' + file_name
+        #     print (output_file_name)
+        
+    
+    # extracted_text = extract_protected_pdf_text(path = 'pdfin\\15935_22801.pdf')
+    # file_name = create_file_name(text = extracted_text)
+    # output_file_name = 'pdfout\\' + file_name
+    
+    # remove_password_and_save(input_path = 'pdfin\\15935_22801.pdf', output_path = output_file_name)
 
 if __name__ == '__main__':
     main()
