@@ -14,10 +14,18 @@ def add_days_to_date(year: int, month: int, day: int, days_to_add: int) -> date:
 
 def main():
         
-    # My first sick day was 7-11-2019 and 120 day rule states that my employee can fire me with one month notice after 120 days
-    last_sick_day = add_days_to_date(day = 7, month = 11, year = 2019, days_to_add = 120)
+    # My first sick day was 7-10-2019 and 120 day rule states that my employee can fire me with one month notice after 120 days
+    # But I also had 2 sick days earlier in 2019 so I should set the start date to 5-10-2019 to compensate.
+    last_sick_day = add_days_to_date(day = 5, month = 10, year = 2019, days_to_add = 120)
     try:
         print ('Last sick day based on 120 day rule: ', last_sick_day.strftime("%d/%m/%Y"))
+    except AttributeError as e:
+        print('Couldnt print date: ', str(e))
+    
+    # First day they can fire me also based on the 120 day rule
+    first_fire_day = add_days_to_date(day = 5, month = 10, year = 2019, days_to_add = 121)
+    try:
+        print ('First day they can fire me based on 120 day rule: ', first_fire_day.strftime("%d/%m/%Y"))
     except AttributeError as e:
         print('Couldnt print date: ', str(e))
     
