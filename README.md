@@ -13,6 +13,13 @@ Only tested with <https://www.pluralsight.com/>
 
 Resursively find the bad XML files in a choco install dir
 
+### mailtool.py
+
+Use <https://www.python.org/dev/peps/pep-0008/>
+
+Diagram of the process  
+![alt](gmailscript.png 'Diagram')
+
 ### lastsickday.py
 
 Attempt at having "fun" while being sick.
