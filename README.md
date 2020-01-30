@@ -17,6 +17,9 @@ Resursively find the bad XML files in a choco install dir
 
 Use <https://www.python.org/dev/peps/pep-0008/>
 
+Diagram of the process  
+![alt](gmailscript.png 'Diagram')
+
 ### lastsickday.py
 
 Attempt at having "fun" while being sick.
