@@ -125,6 +125,9 @@ def main():
             print (output_file_name)
         elif '22801' in file:
             print('22801 baby: ' + file)
+            # TODO: Remove password found here from git history:
+            # https://help.github.com/en/github/authenticating-to-github/removing-sensitive-data-from-a-repository
+            # Move the content of this file to another file without the password
             extracted_text = extract_protected_pdf_text(path=file, password='2505832461')
             file_name = create_file_name(text_or_filename = extracted_text)
             output_file_name = 'pdfout\\' + file_name
