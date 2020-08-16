@@ -1,0 +1,79 @@
+#! /bin/bash
+
+## Hvis vi ikke er root bruger så stop script
+if [ ! $(id -u) -eq 0 ]
+then
+	exit 1
+fi
+
+FILE=$1
+
+## Funktion til at oprette brugeren
+function createUser ()
+{
+	BRUGER=$1
+	FORNAVN=$2
+	EFTERNAVN=$3
+	GADE=$4
+	NUMBER=$5
+	STED=$6
+	POSTNR=$7
+	BY=$8
+	I=0
+	BRUGERTEMP=""
+	
+	## Test om brugeren eksistere og tael op hvis brugeren eksistere
+	egrep "^$BRUGER" /etc/passwd >/dev/null
+	while [ $? -eq 0 ]
+	do
+		I=$(expr $I + 1)
+		BRUGERTEMP=$BRUGER$I
+		egrep "^$BRUGERTEMP" /etc/passwd >/dev/null
+	done
+
+	## Generere et random pasord
+	PASORD=$(pwgen -1 -n 8)
+	## Kryptere pasord
+	PASORD2=$(perl -e 'print crypt($ARGV[0], "PASORD")' $PASORD)
+	## Tilfoj bruger
+	useradd -m -c $FORNAVN,$EFTERNAVN,$GADE,$NUMBER,$STED,$POSTNR,$BY -p $PASORD2 $BRUGERTEMP
+	
+	## Hvis forrige kommando blev udfort korrekt opretter vi en fil til brugeren
+	if [ $? -eq 0 ] 
+	then
+		echo "Bruger $BRUGERTEMP oprettet"
+		## Opret fil med oplysninger til brugeren
+		echo "Navn: $EFTERNAVN, $FORNAVN" >> /root/$BRUGERTEMP
+		echo "Adresse: $GADE $NUMBER $STED $POSTNR $BY" >> /root/$BRUGERTEMP
+		echo "Brugernavn: $BRUGERTEMP Pasord: $PASORD" >> /root/$BRUGERTEMP
+	else
+		echo "Det fejlede at oprette $BRUGERTEMP"
+	fi
+}
+
+exec 3<$0
+exec 0<$FILE
+
+## Laes filen linie for linie og opret en bruger for hver linie
+while read LINE
+do
+	## Split strengen
+	FORNAVN=${LINE%%;*};REST=${LINE#*;}
+	EFTERNAVN=${REST%%;*};REST=${REST#*;}
+	GADE=${REST%%;*};REST=${REST#*;}
+	NUMBER=${REST%%;*};REST=${REST#*;}
+	STED=${REST%%;*};REST=${REST#*;}
+	POSTNR=${REST%%;*};REST=${REST#*;}
+	BY=${REST%%;*};REST=${REST#*;}
+
+	## Tager de forste 2 bogstaver i fornavn og efternavn og laver $BRUGER variablen ud fra det
+	PART1=${FORNAVN:0:2}
+	PART2=${EFTERNAVN:0:2}
+	BRUGER=$PART1$PART2
+
+	## kald createUser funktionen
+	createUser $BRUGER $FORNAVN $EFTERNAVN $GADE $NUMBER $STED $POSTNR $BY
+done
+
+exec 0<&3
+

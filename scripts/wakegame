@@ -1,0 +1,2 @@
+#! /bin/sh
+wakeonlan 00:04:61:58:27:CB

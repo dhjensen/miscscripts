@@ -2,6 +2,12 @@
 
 Various scripts I find usefull
 
+## Folder description
+
+### scripts
+
+Some scripts I once created for debian home server project.
+
 ## File description
 
 ### courserip/Get.ps1

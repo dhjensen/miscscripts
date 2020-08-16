@@ -1,0 +1,56 @@
+#! /bin/sh
+
+BACKUPTYPE=$1
+BACKUPSTI=$2
+MOUNTPOINT=/tmp/backup
+SMBMOUNTSTI=//daniel-game/Documents
+BACKUPNAME=backup-$(date +%d-%m-%Y-%H-%M-%S).tar.gz
+
+## Test om $MOUNTPOINT eksistere
+if [ ! -d $MOUNTPOINT ]
+then
+	echo "Opretter mount point $MOUNTPOINT"
+	mkdir $MOUNTPOINT
+fi
+
+## mount backup destinationen
+mount -t smbfs $SMBMOUNTSTI $MOUNTPOINT -o username=guest,password= 
+
+## udskriver hvordan programmet skal anvendes
+function usage () 
+{
+	echo "\"$1\" er ikke et relevant argument"
+	echo
+	echo "usage: backup [full | incremental] katalog"
+	break
+}
+
+## Full backup
+function full ()
+{
+	if [ -r $MOUNTPOINT/backup.list ]
+	then
+		rm $MOUNTPOINT/backup.list
+	fi
+	incremental
+}
+
+## Incremental backup siden sidste fullbackup
+function incremental ()
+{
+	tar -czp --listed-incremental $MOUNTPOINT/backup.list -f $MOUNTPOINT/$BACKUPNAME $BACKUPSTI 
+}
+
+## Tager backup af filer der er modificeret de sidste 12 timer
+function dagsBackup () {
+	tar -czp --newer-mtime '12 hours ago' -f $MOUNTPOINT/$BACKUPNAME $BACKUPSTI
+}
+
+case $BACKUPTYPE in
+	full) full;;
+	incremental) dagsBackup;;
+	*) usage $BACKUPTYPE;;
+esac
+
+umount $MOUNTPOINT
+rmdir $MOUNTPOINT
